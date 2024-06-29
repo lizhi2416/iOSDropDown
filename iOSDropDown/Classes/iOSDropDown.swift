@@ -145,7 +145,7 @@ open class DropDown: UITextField {
             rightViewMode = .always
             rightView?.addSubview(arrowContainerView)
         }
-
+ 
         arrow = Arrow(origin: CGPoint(x: center.x - arrowSize / 2, y: center.y - arrowSize / 2), size: arrowSize)
         arrowContainerView.addSubview(arrow)
 
@@ -239,53 +239,37 @@ open class DropDown: UITextField {
         if height < (keyboardHeight + tableheightX) {
             y = pointToParent.y - tableheightX
         }
-        UIView.animate(withDuration: 0.9,
-                       delay: 0,
-                       usingSpringWithDamping: 0.4,
-                       initialSpringVelocity: 0.1,
-                       options: .curveEaseInOut,
-                       animations: { () -> Void in
-
-                           self.table.frame = CGRect(x: self.pointToParent.x,
-                                                     y: y,
-                                                     width: self.frame.width,
-                                                     height: self.tableheightX)
-                           self.table.alpha = 1
-                           self.shadow.frame = self.table.frame
-                           self.shadow.dropShadow()
-                           self.arrow.position = .up
-
-                       },
-                       completion: { (_) -> Void in
-                           self.layoutIfNeeded()
-
-                       })
+        UIView.animate(withDuration: 0.3) {
+            self.table.frame = CGRect(x: self.pointToParent.x,
+                                      y: y,
+                                      width: self.frame.width,
+                                      height: self.tableheightX)
+            self.table.alpha = 1
+            self.shadow.frame = self.table.frame
+            self.shadow.dropShadow()
+            self.arrow.position = .up
+        } completion: { _ in
+            self.layoutIfNeeded()
+        }
     }
 
     public func hideList() {
         TableWillDisappearCompletion()
-        UIView.animate(withDuration: 1.0,
-                       delay: 0.4,
-                       usingSpringWithDamping: 0.9,
-                       initialSpringVelocity: 0.1,
-                       options: .curveEaseInOut,
-                       animations: { () -> Void in
-                           self.table.frame = CGRect(x: self.pointToParent.x,
-                                                     y: self.pointToParent.y + self.frame.height,
-                                                     width: self.frame.width,
-                                                     height: 0)
-                           self.shadow.alpha = 0
-                           self.shadow.frame = self.table.frame
-                           self.arrow.position = .down
-                       },
-                       completion: { (_) -> Void in
-
-                           self.shadow.removeFromSuperview()
-                           self.table.removeFromSuperview()
-                           self.backgroundView.removeFromSuperview()
-                           self.isSelected = false
-                           self.TableDidDisappearCompletion()
-                       })
+        UIView.animate(withDuration: 0.3) {
+            self.table.frame = CGRect(x: self.pointToParent.x,
+                                      y: self.pointToParent.y + self.frame.height,
+                                      width: self.frame.width,
+                                      height: 0)
+            self.shadow.alpha = 0
+            self.shadow.frame = self.table.frame
+            self.arrow.position = .down
+        } completion: { _ in
+            self.shadow.removeFromSuperview()
+            self.table.removeFromSuperview()
+            self.backgroundView.removeFromSuperview()
+            self.isSelected = false
+            self.TableDidDisappearCompletion()
+        }
     }
 
     @objc public func touchAction() {
@@ -303,25 +287,18 @@ open class DropDown: UITextField {
         if height < (keyboardHeight + tableheightX) {
             y = pointToParent.y - tableheightX
         }
-        UIView.animate(withDuration: 0.2,
-                       delay: 0.1,
-                       usingSpringWithDamping: 0.9,
-                       initialSpringVelocity: 0.1,
-                       options: .curveEaseInOut,
-                       animations: { () -> Void in
-                           self.table.frame = CGRect(x: self.pointToParent.x,
-                                                     y: y,
-                                                     width: self.frame.width,
-                                                     height: self.tableheightX)
-                           self.shadow.frame = self.table.frame
-                           self.shadow.dropShadow()
-
-                       },
-                       completion: { (_) -> Void in
-                           //  self.shadow.layer.shadowPath = UIBezierPath(rect: self.table.bounds).cgPath
-                           self.layoutIfNeeded()
-
-                       })
+        UIView.animate(withDuration: 0.2) {
+            self.table.frame = CGRect(x: self.pointToParent.x,
+                                      y: y,
+                                      width: self.frame.width,
+                                      height: self.tableheightX)
+            self.shadow.frame = self.table.frame
+            self.shadow.dropShadow()
+        } completion: { _ in
+            //  self.shadow.layer.shadowPath = UIBezierPath(rect: self.table.bounds).cgPath
+            self.layoutIfNeeded()
+        }
+        
     }
 
     // MARK: Filter Methods
@@ -428,22 +405,18 @@ extension DropDown: UITableViewDataSource {
 
 extension DropDown: UITableViewDelegate {
     public func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        selectedIndex = (indexPath as NSIndexPath).row
+        let selectedText = dataArray[selectedIndex!]
+        let currentCell = tableView.cellForRow(at: indexPath)
+        currentCell?.alpha = 0
+        UIView.animate(withDuration: 0.2) {
+            currentCell?.alpha = 1.0
+            currentCell?.backgroundColor = self.selectedRowColor
+        } completion: { _ in
+            self.text = "\(selectedText)"
+            tableView.reloadData()
+        }
         
-        let currentIndex = (indexPath as NSIndexPath).row
-        let selectedText = dataArray[currentIndex]
-        selectedIndex = isSearchEnable ? (optionArray.firstIndex(of: selectedText) ?? currentIndex) : currentIndex // Correct Index For Searched Text
-
-        tableView.cellForRow(at: indexPath)?.alpha = 0
-        UIView.animate(withDuration: 0.5,
-                       animations: { () -> Void in
-                           tableView.cellForRow(at: indexPath)?.alpha = 1.0
-                           tableView.cellForRow(at: indexPath)?.backgroundColor = self.selectedRowColor
-                       },
-                       completion: { (_) -> Void in
-                           self.text = "\(selectedText)"
-
-                           tableView.reloadData()
-                       })
         if hideOptionsWhenSelect {
             touchAction()
             endEditing(true)
@@ -565,3 +538,4 @@ extension UIView {
         return nil
     }
 }
+
