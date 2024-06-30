@@ -22,7 +22,7 @@ iOSDropDown is an Awesome Drop Down Menu Library with Search & other customizati
   s.source           = { :git => 'https://github.com/jriosdev/iOSDropDown.git', :tag => s.version.to_s }
    s.social_media_url = 'https://twitter.com/jishnurajt'
 
-   s.ios.deployment_target = '8.0'
+   s.ios.deployment_target = '9.0'
 
    s.source_files = 'iOSDropDown/Classes/**/*'
   
